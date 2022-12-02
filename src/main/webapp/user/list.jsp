@@ -48,6 +48,8 @@
                 </td>
             </tr>
         </c:forEach>
+        <a href="/users?action=permission">Give permission</a>
+        <a href="/users?action=test-without-tran">Give permission</a>
     </table>
 </div>
 </body>
