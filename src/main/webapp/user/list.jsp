@@ -48,8 +48,10 @@
                 </td>
             </tr>
         </c:forEach>
-        <a href="/users?action=permission">Give permission</a>
-        <a href="/users?action=test-without-tran">Give permission</a>
+        <a href="/users?action=permission">Give permission</a> <br>
+        <a href="/users?action=test-without-tran">SQL without trans</a> <br>
+        <a href="/users?action=test-use-tran">SQL use trans</a>
+
     </table>
 </div>
 </body>
