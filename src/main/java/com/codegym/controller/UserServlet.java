@@ -102,7 +102,7 @@ public class UserServlet extends HttpServlet {
         String sort = request.getParameter("sort");
         List<User> listUser;
         if (country == null && sort == null) {
-            listUser = userDAO.selectAllUsers();
+            listUser = userDAO.listAllUsers();
         } else if (country != null){
             listUser = userDAO.searchByCountry(country);
         } else {
@@ -149,7 +149,7 @@ public class UserServlet extends HttpServlet {
         String country = request.getParameter("country");
 
         User book = new User(id, name, email, country);
-        userDAO.updateUser(book);
+        userDAO.updateUserTrans(book);
         RequestDispatcher dispatcher = request.getRequestDispatcher("user/edit.jsp");
         dispatcher.forward(request, response);
     }
@@ -157,7 +157,7 @@ public class UserServlet extends HttpServlet {
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
-        userDAO.deleteUser(id);
+        userDAO.deleteUserTrans(id);
 
         List<User> listUser = userDAO.selectAllUsers();
         request.setAttribute("listUser", listUser);

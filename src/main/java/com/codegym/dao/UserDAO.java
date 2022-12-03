@@ -7,6 +7,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class UserDAO implements IUserDAO{
     private String jdbcURL = "jdbc:mysql://localhost:3306/demo?useSSL=false";
@@ -117,11 +118,49 @@ public class UserDAO implements IUserDAO{
         return users;
     }
 
+    @Override
+    public List<User> listAllUsers() {
+        String query = "{CALL get_all_users()}";
+        List<User> users = new ArrayList<>();
+
+        try (Connection connection = getConnection();
+             CallableStatement cstmt = connection.prepareCall(query);
+        ) {
+            ResultSet rs = cstmt.executeQuery();
+            while (rs.next()) {
+                int id = Integer.parseInt(rs.getString("id"));
+                String name = rs.getString("name");
+                String email = rs.getString("email");
+                String country = rs.getString("country");
+
+                User user = new User(id, name, email, country);
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return users;
+    }
+
     public boolean deleteUser(int id) throws SQLException {
         boolean rowDeleted;
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_USERS_SQL);) {
             statement.setInt(1, id);
             rowDeleted = statement.executeUpdate() > 0;
+        }
+        return rowDeleted;
+    }
+
+    @Override
+    public boolean deleteUserTrans(int id) throws SQLException {
+        String query = "{CALL delete_user(?)}";
+        boolean rowDeleted;
+
+        try (Connection connection = getConnection();
+            CallableStatement cstmt = connection.prepareCall(query);
+        ) {
+            cstmt.setInt(1, id);
+            rowDeleted = cstmt.executeUpdate() > 0;
         }
         return rowDeleted;
     }
@@ -135,6 +174,22 @@ public class UserDAO implements IUserDAO{
             statement.setInt(4, user.getId());
 
             rowUpdated = statement.executeUpdate() > 0;
+        }
+        return rowUpdated;
+    }
+
+    @Override
+    public boolean updateUserTrans(User user) throws SQLException {
+        String query = "{CALL update_user(?,?,?,?)}";
+        boolean rowUpdated;
+        try (Connection connection = getConnection();
+            CallableStatement cstmt = connection.prepareCall(query);
+        ) {
+            cstmt.setInt(1, user.getId());
+            cstmt.setString(2, user.getName());
+            cstmt.setString(3, user.getEmail());
+            cstmt.setString(4, user.getCountry());
+            rowUpdated = cstmt.executeUpdate() > 0;
         }
         return rowUpdated;
     }
